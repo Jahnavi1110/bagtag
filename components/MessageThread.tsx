@@ -10,7 +10,7 @@ export function MessageThread({ messages, viewer }: { messages: Message[]; viewe
         const mine = m.sender === viewer;
         return (
           <li key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${mine ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"}`}>
+            <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${mine ? "bg-ink text-canvas" : "bg-white text-ink border border-ink/5"}`}>
               <div className="mb-0.5 text-xs font-semibold opacity-75">
                 {mine ? "You" : m.sender === "finder" ? "Finder" : "Owner"} · {new Date(m.createdAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
               </div>

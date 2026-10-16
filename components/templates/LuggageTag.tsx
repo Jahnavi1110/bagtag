@@ -9,7 +9,7 @@ export function LuggageTag({ itemName, design, code, qr }: TemplateProps) {
       <div className="flex flex-1 flex-col justify-between py-[20px] pl-[64px] pr-[12px]">
         <div>
           <div className="text-[12px] font-semibold uppercase tracking-[0.2em] opacity-80">If found</div>
-          <div className="mt-1 text-[24px] font-bold leading-tight">{itemName || "Item name"}</div>
+          <div className="mt-1 text-[22px] font-display font-black tracking-tight leading-tight">{itemName || "Item name"}</div>
           <div className="mt-2 text-[14px] leading-snug opacity-90">{design.customText}</div>
         </div>
         <div className="whitespace-nowrap font-mono text-[12px] tracking-wider opacity-80">tagback · {code}</div>

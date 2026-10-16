@@ -35,7 +35,7 @@ export function TagForm({ tag, siteUrl }: { tag?: Tag; siteUrl: string }) {
           <label className={label} htmlFor="photo">Photo (optional, image ≤ 2 MB)</label>
           <input id="photo" name="photo" type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="text-sm" />
           {tag?.photoPath && (
-            <label className="mt-1 flex items-center gap-2 text-sm text-gray-600">
+            <label className="mt-1 flex items-center gap-2 text-sm text-muted">
               <input type="checkbox" name="removePhoto" /> Remove current photo
             </label>
           )}
@@ -49,10 +49,10 @@ export function TagForm({ tag, siteUrl }: { tag?: Tag; siteUrl: string }) {
                 key={id}
                 type="button"
                 onClick={() => update({ template: id })}
-                className={`rounded-md border px-2 py-2 text-left text-sm ${design.template === id ? "border-blue-600 bg-blue-50" : "border-gray-300"}`}
+                className={`rounded-md border px-2 py-2 text-left text-sm ${design.template === id ? "border-ink bg-pill" : "border-ink/15"}`}
               >
                 <div className="font-medium">{TEMPLATES[id].label}</div>
-                <div className="text-xs text-gray-500">{TEMPLATES[id].widthMm} × {TEMPLATES[id].heightMm} mm</div>
+                <div className="text-xs text-muted">{TEMPLATES[id].widthMm} × {TEMPLATES[id].heightMm} mm</div>
               </button>
             ))}
           </div>
@@ -67,7 +67,7 @@ export function TagForm({ tag, siteUrl }: { tag?: Tag; siteUrl: string }) {
                 type="button"
                 aria-label={`Colour ${c}`}
                 onClick={() => update({ color: c })}
-                className={`h-8 w-8 rounded-full ring-offset-2 ${design.color === c ? "ring-2 ring-gray-900" : ""}`}
+                className={`h-8 w-8 rounded-full ring-offset-2 ${design.color === c ? "ring-2 ring-ink" : ""}`}
                 style={{ background: c }}
               />
             ))}
@@ -83,12 +83,12 @@ export function TagForm({ tag, siteUrl }: { tag?: Tag; siteUrl: string }) {
         <button className={btnPrimary} disabled={pending}>{pending ? "Saving…" : tag ? "Save changes" : "Create tag"}</button>
       </form>
 
-      <div className={`${card} flex flex-col items-center justify-center gap-3 bg-gray-50`}>
-        <div className="text-sm text-gray-500">Live preview · {TEMPLATES[design.template].label} at real size</div>
+      <div className={`${card} flex flex-col items-center justify-center gap-3 bg-canvas`}>
+        <div className="text-sm text-muted">Live preview · {TEMPLATES[design.template].label} at real size</div>
         <div className="max-w-full overflow-x-auto p-2">
           <TagPreview itemName={itemName} design={design} code={tag?.code ?? null} siteUrl={siteUrl} />
         </div>
-        {!tag && <p className="text-xs text-gray-500">The QR code gets its unique link when you create the tag.</p>}
+        {!tag && <p className="text-xs text-muted">The QR code gets its unique link when you create the tag.</p>}
       </div>
     </div>
   );

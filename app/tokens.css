@@ -1,0 +1,26 @@
+/*
+ * Design tokens: the single source for colours, fonts and the mobile breakpoint.
+ * Adapted from the motionsites.ai "Playful Idea" template's design language.
+ * Tailwind v4 turns these into utilities: bg-canvas, text-ink, font-display, wide:…
+ */
+@theme {
+  --color-canvas: #f0eefa;
+  --color-canvas-alt: #dfe4f2; /* desktop fallback behind the canvas */
+  --color-ink: #080909;
+  --color-pill: #f7f8fa;
+  --color-muted: #55566a;
+
+  --color-tagby: #c9b8ef;
+  --color-tagby-light: #ddd0f7;
+  --color-tagby-shade: #a995e0;
+  --color-tagby-pink: #f6b8cf;
+  --color-tagby-pink-dark: #ee93b6;
+
+  --font-display: "Epilogue", "Arial Black", system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-pill: 100px;
+
+  /* Desktop composition starts above 700px */
+  --breakpoint-wide: 43.8125rem;
+}

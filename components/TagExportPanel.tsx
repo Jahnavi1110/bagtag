@@ -26,7 +26,7 @@ export function TagExportPanel({ tag, siteUrl }: { tag: Tag; siteUrl: string }) 
   const t = TEMPLATES[tag.design.template];
   return (
     <div className="space-y-3">
-      <div className="max-w-full overflow-x-auto rounded-md bg-gray-50 p-4">
+      <div className="max-w-full overflow-x-auto rounded-md bg-canvas p-4">
         <TagPreview ref={ref} itemName={tag.itemName} design={tag.design} code={tag.code} siteUrl={siteUrl} />
       </div>
       <div className="flex flex-wrap items-center gap-2">

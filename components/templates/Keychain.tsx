@@ -9,7 +9,7 @@ export function Keychain({ itemName, design, code, qr }: TemplateProps) {
       style={{ width: mm(35), height: mm(55), background: design.color }}
     >
       <div className="h-[18px] w-[18px] rounded-full bg-white" />
-      <div className="w-full truncate px-[8px] text-[12px] font-bold">{itemName || "Item name"}</div>
+      <div className="w-full truncate px-[8px] text-[12px] font-display font-black tracking-tight">{itemName || "Item name"}</div>
       <Qr src={qr} sizeMm={27} />
       <div className="font-mono text-[10px] tracking-widest opacity-90">{code}</div>
     </div>

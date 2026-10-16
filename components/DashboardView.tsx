@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { TEMPLATES } from "@/lib/templates";
 import type { TagSummary } from "@/lib/types";
+import { Tagby } from "./mascot/Tagby";
 import { StatusBadge } from "./StatusBadge";
 import { btnPrimary, btnSecondary, card } from "./ui";
 
@@ -18,7 +19,10 @@ export function DashboardView({ tags }: { tags: TagSummary[] }) {
       </div>
 
       {tags.length === 0 ? (
-        <div className={`${card} text-center text-gray-600`}>No tags yet. Make your first one!</div>
+        <div className={`${card} flex flex-col items-center text-center text-muted`} data-testid="empty-dashboard">
+          <Tagby mood="neutral" size={160} />
+          <p className="mt-3">No tags yet. Make your first one!</p>
+        </div>
       ) : (
         <ul className="grid gap-3 md:grid-cols-2" data-testid="tag-list">
           {tags.map((t) => (
@@ -28,13 +32,13 @@ export function DashboardView({ tags }: { tags: TagSummary[] }) {
                   <span className="truncate font-semibold">{t.itemName}</span>
                   <StatusBadge status={t.status} />
                 </div>
-                <div className="mt-1 text-sm text-gray-500">
+                <div className="mt-1 text-sm text-muted">
                   {TEMPLATES[t.design.template].label} · <span className="font-mono">{t.code}</span>
                 </div>
-                <div className="mt-1 flex gap-3 text-sm text-gray-600">
+                <div className="mt-1 flex gap-3 text-sm text-muted">
                   <span>{plural(t.scanCount, "scan")}</span>
                   <span>{plural(t.conversationCount, "conversation")}</span>
-                  {t.unreadCount > 0 && <span className="font-semibold text-blue-700">{t.unreadCount} unread</span>}
+                  {t.unreadCount > 0 && <span className="font-semibold text-ink">{t.unreadCount} unread</span>}
                 </div>
               </div>
               <div className="flex shrink-0 gap-2">

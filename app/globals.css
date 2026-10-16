@@ -1,6 +1,20 @@
 @import "tailwindcss";
+@import "./tokens.css";
+
+html {
+  background: var(--color-canvas-alt);
+}
 
 body {
-  background: #f8fafc;
-  color: #111827;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-synthesis: none;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.02em;
 }

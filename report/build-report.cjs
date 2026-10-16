@@ -108,7 +108,7 @@ function pngSize(file) {
 }
 
 /** Embeds a PNG sized from its pixel dimensions at 96 DPI, scaled down to fit the page width (and maxH). */
-function image(file, { maxW = CONTENT_PX, maxH = 760, deviceScale = 1 } = {}) {
+function image(file, { maxW = CONTENT_PX, maxH = 760, deviceScale = 1 } = {}, keepNext = false) {
   const full = path.join(SHOTS, file);
   if (!fs.existsSync(full)) return p([run(`[Screenshot ${file} not found]`, { italics: true, color: "C00000" })]);
   let { w, h } = pngSize(full);
@@ -118,6 +118,7 @@ function image(file, { maxW = CONTENT_PX, maxH = 760, deviceScale = 1 } = {}) {
   return new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { after: 240 },
+    keepNext,
     children: [
       new ImageRun({
         type: "png",
@@ -130,9 +131,13 @@ function image(file, { maxW = CONTENT_PX, maxH = 760, deviceScale = 1 } = {}) {
 }
 
 const figures = [];
-function figure(caption, file, opts) {
+function figure(caption, files, opts) {
   figures.push(caption);
-  return [new Paragraph({ spacing: { before: 120, after: 80 }, keepNext: true, children: [bold(`Figure ${figures.length}: ${caption}`)] }), image(file, opts)];
+  const list = Array.isArray(files) ? files : [files];
+  return [
+    new Paragraph({ spacing: { before: 120, after: 80 }, keepNext: true, children: [bold(`Figure ${figures.length}: ${caption}`)] }),
+    ...list.map((file, i) => image(file, opts, i < list.length - 1)),
+  ];
 }
 
 function version(pkg) {
@@ -175,7 +180,8 @@ const TECH = [
   [`Next.js${v("next")} (App Router)`, "Full-stack React framework: pages, server actions for owner operations, route handlers for finder APIs and middleware for route protection."],
   [`React${v("react")}`, "Component-based user interface, including the live tag preview and forms."],
   [`TypeScript${v("typescript")}`, "Static typing shared by client and server code (e.g. the PublicTag type that limits what finders can see)."],
-  [`Tailwind CSS${v("tailwindcss")}`, "Utility-first styling kept inside small, replaceable components."],
+  [`Tailwind CSS${v("tailwindcss")}`, "Utility-first styling kept inside small, replaceable components; design tokens in one CSS file."],
+  ["Fontsource (Epilogue 900, DM Sans 400)", "Self-hosted web fonts for the playful landing page and the rest of the interface."],
   [`SQLite (better-sqlite3${v("better-sqlite3")})`, "Embedded relational database stored in ./data/tagback.db, with foreign keys, CHECK constraints and indexes."],
   [`bcryptjs${v("bcryptjs")}`, "One-way hashing of owner passwords (cost factor 12)."],
   [`jose${v("jose")}`, "Signing and verifying the HS256 session JWT stored in an httpOnly cookie."],
@@ -239,6 +245,20 @@ const SNIPPETS = [
     explanation:
       "Each template is drawn in the browser at 4 pixels per millimetre, so the preview has the real proportions of the printed tag. tagToPng() rasterises the preview's DOM node with html-to-image at a 3× pixel ratio, which is about 305 DPI and prints sharply. downloadPdf() creates a jsPDF document whose page size equals the template's physical size in millimetres (for example 100 × 55 mm for the luggage tag) and places the image over the whole page. Printed at 100 % scale, the result has the correct size and a scannable QR code. The orientation is set explicitly because jsPDF otherwise treats custom formats as portrait. The same function is reused to place several tags on an A4 print sheet.",
   },
+  {
+    file: "lib/eyeTracking.ts and components/mascot/Tagby.tsx",
+    lines: [
+      ...functionBody("lib/eyeTracking.ts", "export function pupilTarget"),
+      "",
+      ...extract("lib/eyeTracking.ts", "export const lerp", "export const lerp"),
+      "",
+      "// Inside Tagby: one animation frame",
+      ...extract("components/mascot/Tagby.tsx", "const step = () => {", "raf = moving ? requestAnimationFrame(step) : 0;").map((l) => l.replace(/^ {4}/, "")),
+      "};",
+    ],
+    explanation:
+      "Tagby's eyes follow the pointer in three steps. First, pupilTarget() takes the vector from the eye's centre on screen to the pointer and divides it by the number of screen pixels per SVG unit, so the result is correct whether Tagby is drawn 150 pixels tall or half the height of the window. Second, the length of that vector is clamped to 35 % of the eye radius, so the pupil always stays inside the eye, and it shrinks smoothly when the pointer is close to the face. Third, on every animation frame each pupil moves 15 % of the remaining distance toward its target (linear interpolation, lerp), which produces a soft, eased motion. The requestAnimationFrame loop stops as soon as both pupils have arrived, so no animation runs while nothing is moving. Under prefers-reduced-motion the pupils jump straight to the target instead of easing.",
+  },
 ];
 
 // ---------- Document ----------
@@ -293,6 +313,9 @@ const children = [
     "When someone finds the item and scans the QR code, the public page shows only the item name, photo, note and status, with the message \"This item belongs to someone. Help return it!\". If the owner has marked the item as Lost, a prominent alert banner is shown. The finder writes a message and may opt in to sharing their browser location, which the owner sees as an OpenStreetMap link. The finder then receives a private chat link, /chat/<token>, which is the only way back to the conversation. The owner sees the message on the dashboard, where each tag shows its status badge, scan count and unread-message count, and replies from the tag's management page. At no point is the owner's email or phone shown to the finder, and the owner learns nothing about the finder beyond what the finder chooses to write.",
   ),
   p(
+    "The interface is presented through a playful, minimal landing page and an original animated mascot, Tagby: a plush luggage tag drawn entirely in SVG. Tagby's pupils follow the visitor's pointer, it bobs, blinks and glances around when idle, and its mood reflects the state of a tag: happy when an item is safe, worried when it is reported lost and celebrating when it has been found or when a finder has just sent a message. The mascot also appears on the empty dashboard and on the page shown for unknown tag codes, and all of its motion is disabled for users who request reduced motion.",
+  ),
+  p(
     "The application runs entirely on the local machine: data is stored in a SQLite database and uploaded photos in a local folder, and no external accounts or cloud services are required. The expected outcome is a working, tested prototype showing that anonymous two-way communication between owner and finder can be achieved with standard web technologies and a carefully designed data-access layer.",
   ),
   rule(),
@@ -318,15 +341,15 @@ const children = [
   ),
   label("Step 5", "", { keepNext: true }),
   p(
-    "Testing, screenshots and delivery. Twenty-five Vitest unit tests cover code generation (including uniqueness over 10,000 codes), token hashing, zod schemas, the rate limiter, status transitions and owner access control on a temporary database. A Playwright smoke test logs in as the seeded demo user, creates a tag, downloads its PDF, sends a message from an anonymous browser context, replies as the owner and confirms that the reply appears in the finder's chat. An idempotent seed script creates clearly marked demo data. A screenshot script builds the app, starts it on a free port and captures every page used in this report. The README documents setup, architecture, the privacy model and design decisions. The project was originally planned around a hosted database and cloud deployment, but was deliberately changed to run fully on localhost, so deployment is listed as future work.",
+    "Testing, screenshots and delivery. Thirty Vitest unit tests cover code generation (including uniqueness over 10,000 codes), token hashing, zod schemas, the rate limiter, status transitions, owner access control on a temporary database and the mascot's eye-tracking maths. A Playwright smoke test logs in as the seeded demo user, creates a tag, downloads its PDF, sends a message from an anonymous browser context, replies as the owner and confirms that the reply appears in the finder's chat. An idempotent seed script creates clearly marked demo data. A screenshot script builds the app, starts it on a free port and captures every page used in this report. The README documents setup, architecture, the privacy model and design decisions. The project was originally planned around a hosted database and cloud deployment, but was deliberately changed to run fully on localhost, so deployment is listed as future work. Finally, the landing page was restyled in a playful 'creative studio' style (design language adapted from the motionsites.ai 'Playful Idea' template) and the Tagby mascot was added, with design tokens and self-hosted fonts shared by the whole interface.",
   ),
   rule(),
 
   // 6
   h1("6. IMPORTANT CODE SNIPPETS"),
-  p("The following snippets are taken directly from the repository and show the core privacy, security and export mechanisms."),
+  p("The following snippets are taken directly from the repository and show the core privacy, security, export and animation mechanisms."),
   ...SNIPPETS.flatMap((s, i) => [
-    new Paragraph({ spacing: { before: 240, after: 60 }, keepNext: true, children: [bold(`Code Snippet ${i + 1}:`), run(` ${["Owner access-control helper (replaces RLS)", "Finder token creation and hashing", "Message route handler with validation and rate limiting", "Tag export function"][i]}`)] }),
+    new Paragraph({ spacing: { before: 240, after: 60 }, keepNext: true, children: [bold(`Code Snippet ${i + 1}:`), run(` ${["Owner access-control helper (replaces RLS)", "Finder token creation and hashing", "Message route handler with validation and rate limiting", "Tag export function", "Tagby eye tracking (vector → clamp → lerp)"][i]}`)] }),
     ...codeBlock(s.file, s.lines),
     new Paragraph({ spacing: { before: 160, after: 60 }, keepNext: true, children: [bold("Explanation:")] }),
     p(s.explanation),
@@ -335,16 +358,17 @@ const children = [
 
   // 7
   h1("7. OUTPUT SCREENSHOTS"),
-  p("The following screenshots were captured automatically from the running application with Playwright, using the seeded demo account."),
-  ...figure("Main Output: Owner dashboard listing tags with status badges, scan counts and unread messages", "dashboard.png"),
+  p("The following screenshots were captured automatically from the running application with Playwright, using the seeded demo account.", { keepNext: true }),
+  ...figure("Main Output: Landing page with the Tagby mascot (pointer at the top-left; the eyes follow it)", "landing-desktop.png"),
+  ...figure("Owner dashboard listing tags with status badges, scan counts and unread messages", "dashboard.png"),
   ...figure("Tag maker with live real-scale preview (school-bag label template)", "tag-maker.png"),
   ...figure("Exported PNG of a luggage tag (3× resolution) with the embedded QR code", "tag-export.png", { maxW: 420 }),
   ...figure("Tag management page: export options, status controls and anonymous conversation with a finder", "owner-chat.png"),
   ...figure("Public finder page shown after scanning a tag", "finder-page.png"),
   ...figure("Finder page for an item reported as Lost, with the alert banner", "finder-lost.png"),
   ...figure("Finder page on a mobile phone (390 × 844)", "finder-mobile.png", { deviceScale: 2, maxH: 460 }),
+  ...figure("Tagby's moods on the finder page: worried for a Lost item (top) and celebrating for a Found item (bottom)", ["finder-lost-tagby.png", "finder-found-tagby.png"], { maxW: 440 }),
   ...figure("A4 print sheet with several tags at real size", "print-sheet.png"),
-  ...figure("Landing page", "landing.png"),
   ...figure("Login page", "login.png"),
   rule(),
 
@@ -374,6 +398,8 @@ const children = [
     [bold("QR scannability on small templates. "), run("The QR code had to stay large enough to scan on a 35 × 55 mm keychain and a 50 mm round sticker while leaving room for text. The QR is always rendered black on white with a quiet zone and error-correction level M, and is never smaller than 25 mm. In the first screenshots, the 38 mm QR on the luggage tag squeezed the text column so that the tag code wrapped onto two lines; the QR was reduced to 34 mm and the code line set to no-wrap, after which the screenshots were recaptured.")],
     [bold("Toolchain errors during the build. "), run("TypeScript 6 rejected the side-effect import of globals.css, which was fixed with a module declaration for *.css files. The jose library caused 'CompressionStream is not supported in the Edge Runtime' warnings in middleware, which was fixed by running the middleware on the Node.js runtime. npm 11 blocked the install scripts of native packages such as better-sqlite3, which were explicitly approved in package.json.")],
     [bold("Repository and test configuration. "), run("The .gitignore pattern 'uploads/' unintentionally excluded the route folder app/api/uploads, which was noticed when a commit failed and was fixed by anchoring the patterns to the repository root. The 'server-only' guard package throws outside Next.js, which broke the Vitest tests and the seed script. The database module was kept free of it and Vitest was configured to replace it with an empty stub.")],
+    [bold("Keeping the mascot's eye maths correct. "), run("The pointer position is measured in screen pixels while the pupils move in SVG units, and Tagby is drawn at very different sizes. Dividing the pointer vector by the rendered pixels per SVG unit keeps the direction and the clamp correct at every size, which is covered by a unit test. In the first finder screenshot the worried Tagby looked up and to the left while the pointer was at the bottom right: the eye centres had been measured once on mount, and the self-hosted fonts loaded afterwards and shifted the layout without firing a resize or scroll event. The eyes are now re-measured whenever a new movement starts. The screenshot script also had to wait for React hydration before moving the pointer, because earlier movements were not seen by any listener.")],
+    [bold("Avoiding a constantly running animation loop, and a build error. "), run("A naive requestAnimationFrame loop would run sixty times a second for every mascot on the page. The loop is therefore started only by pointer movement or an idle glance and stops once the pupils reach their target; bobbing and blinking use CSS. A rebuild then failed with 'EINVAL: readlink' inside the .next folder because OneDrive had converted build output into cloud placeholders; deleting the .next folder resolved it. Finally, loading only the 400 weight of DM Sans with font synthesis disabled silently removed the bold weight from item names on the printed tags; this was caught while checking the exported PNG in this report, and the tag templates now use Epilogue 900 for item names.")],
   ]),
   rule(),
 
@@ -389,7 +415,7 @@ const children = [
   ]),
   h2("Conclusion"),
   p(
-    "The project produced Tagback, a working full-stack web application that lets owners create printable QR tags in five formats and lets finders contact them through an anonymous, two-way relay. All core features were implemented and tested: authentication, the dashboard, the tag maker with live preview, PNG, PDF and A4 export, status management, the public finder page with a Lost alert and opt-in location, and the private finder chat. Neither party's identity is exposed: owners' contact details are never sent to finders, and finders are identified only by the hash of a random token. The 25 unit tests and the end-to-end smoke test pass against the local database. Planned extensions include email notifications, real-time chat and deployment to a hosted environment.",
+    "The project produced Tagback, a working full-stack web application that lets owners create printable QR tags in five formats and lets finders contact them through an anonymous, two-way relay. All core features were implemented and tested: authentication, the dashboard, the tag maker with live preview, PNG, PDF and A4 export, status management, the public finder page with a Lost alert and opt-in location, and the private finder chat. Neither party's identity is exposed: owners' contact details are never sent to finders, and finders are identified only by the hash of a random token. A playful landing page and the animated Tagby mascot give the interface a friendly identity while respecting reduced-motion preferences. The 30 unit tests and the end-to-end smoke test pass against the local database. Planned extensions include email notifications, real-time chat and deployment to a hosted environment.",
   ),
   rule(),
 

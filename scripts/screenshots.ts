@@ -5,6 +5,7 @@
  */
 import { execSync, spawn } from "node:child_process";
 import net from "node:net";
+import os from "node:os";
 import path from "node:path";
 import { chromium, type Page } from "@playwright/test";
 import { ensureEnv, readEnvFile } from "./env";
@@ -37,6 +38,14 @@ async function waitForServer(url: string, timeoutMs = 120_000) {
 }
 
 const shot = (page: Page, name: string) => page.screenshot({ path: path.join(OUT, name) });
+/** Wait for hydration, then glide the pointer so Tagby's pointermove listener sees it. */
+async function pointAt(page: Page, x: number, y: number) {
+  await page.waitForLoadState("networkidle");
+  await page.mouse.move(720, 450);
+  await page.mouse.move(x, y, { steps: 8 });
+  await page.waitForTimeout(900);
+}
+
 const qrReady = (page: Page) => page.locator('[data-testid="tag-preview"][data-ready="true"]').first().waitFor();
 
 async function main() {
@@ -60,8 +69,10 @@ async function main() {
     // Owner pages
     const ownerCtx = await browser.newContext({ ...desktop, acceptDownloads: true });
     const owner = await ownerCtx.newPage();
+    // Landing: park the pointer top-left so Tagby's eyes visibly look that way.
     await owner.goto(`${base}/`);
-    await shot(owner, "landing.png");
+    await pointAt(owner, 4, 4);
+    await shot(owner, "landing-desktop.png");
 
     await owner.goto(`${base}/login`);
     await owner.getByLabel("Email").fill(DEMO_EMAIL);
@@ -101,8 +112,25 @@ async function main() {
     await finder.goto(`${base}/t/DEMAB234`);
     await shot(finder, "finder-lost.png");
 
+    await finder.goto(`${base}/t/DEMAB234`);
+    await pointAt(finder, 1400, 880);
+    await shot(finder, "finder-lost-tagby.png");
+    await finder.goto(`${base}/t/DEMAD234`);
+    await pointAt(finder, 700, 120);
+    await shot(finder, "finder-found-tagby.png");
+
     const mobileCtx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
     const mobile = await mobileCtx.newPage();
+    await mobile.goto(`${base}/`);
+    await mobile.screenshot({ path: path.join(OUT, "landing-mobile.png"), fullPage: true });
+
+    // Layout check at the narrowest supported width (kept outside the repo).
+    const narrow = await browser.newPage({ viewport: { width: 320, height: 640 } });
+    await narrow.goto(`${base}/`);
+    const check320 = path.join(os.tmpdir(), "tagback-landing-320.png");
+    await narrow.screenshot({ path: check320, fullPage: true });
+    console.log(`320px layout check: ${check320}`);
+
     await mobile.goto(`${base}/t/DEMAB234`);
     await shot(mobile, "finder-mobile.png");
 

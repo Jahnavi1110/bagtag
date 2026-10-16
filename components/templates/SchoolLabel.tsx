@@ -10,7 +10,7 @@ export function SchoolLabel({ itemName, design, code, qr }: TemplateProps) {
         <div className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: design.color }}>
           This bag belongs to
         </div>
-        <div className="text-[22px] font-bold leading-tight text-gray-900">{itemName || "Item name"}</div>
+        <div className="text-[22px] font-display font-black tracking-tight leading-tight text-gray-900">{itemName || "Item name"}</div>
         <div className="text-[13px] text-gray-600">{design.customText}</div>
         <div className="font-mono text-[11px] tracking-widest text-gray-500">{code}</div>
       </div>

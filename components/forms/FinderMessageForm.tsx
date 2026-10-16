@@ -16,7 +16,7 @@ function getPosition(): Promise<{ lat: number; lng: number } | null> {
   });
 }
 
-export function FinderMessageForm({ code }: { code: string }) {
+export function FinderMessageForm({ code, onSent }: { code: string; onSent?: () => void }) {
   const [chatPath, setChatPath] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -36,6 +36,7 @@ export function FinderMessageForm({ code }: { code: string }) {
     setPending(false);
     if (!res.ok) return setError(data.error ?? "Something went wrong");
     setChatPath(data.chatPath);
+    onSent?.();
   }
 
   if (chatPath) {
@@ -49,7 +50,7 @@ export function FinderMessageForm({ code }: { code: string }) {
         <code className="block break-all rounded bg-white p-2 text-xs">{full}</code>
         <div className="flex gap-2">
           <button type="button" className={btnPrimary} onClick={() => navigator.clipboard?.writeText(full)}>Copy link</button>
-          <Link href={chatPath} className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm">Open chat</Link>
+          <Link href={chatPath} className="inline-flex items-center rounded-[100px] border border-ink/15 bg-pill px-4 py-2 text-sm">Open chat</Link>
         </div>
       </div>
     );
@@ -66,12 +67,12 @@ export function FinderMessageForm({ code }: { code: string }) {
         <label htmlFor="website">Website</label>
         <input id="website" name="website" tabIndex={-1} autoComplete="off" />
       </div>
-      <label className="flex items-center gap-2 text-sm text-gray-700">
+      <label className="flex items-center gap-2 text-sm text-muted">
         <input type="checkbox" name="shareLocation" /> Share my current location with the owner (optional)
       </label>
       {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
       <button className={btnPrimary} disabled={pending}>{pending ? "Sending…" : "Send message"}</button>
-      <p className="text-xs text-gray-500">You stay anonymous: the owner never sees your name, email or phone number.</p>
+      <p className="text-xs text-muted">You stay anonymous: the owner never sees your name, email or phone number.</p>
     </form>
   );
 }

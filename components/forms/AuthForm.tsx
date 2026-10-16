@@ -24,9 +24,9 @@ export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: stri
       <button className={`${btnPrimary} w-full`} disabled={pending}>
         {pending ? "Please wait…" : isLogin ? "Log in" : "Sign up"}
       </button>
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm text-muted">
         {isLogin ? "No account? " : "Already have an account? "}
-        <Link href={isLogin ? "/signup" : "/login"} className="text-blue-700 underline">
+        <Link href={isLogin ? "/signup" : "/login"} className="text-ink underline">
           {isLogin ? "Sign up" : "Log in"}
         </Link>
       </p>

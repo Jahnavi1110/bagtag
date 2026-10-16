@@ -44,7 +44,7 @@ export function PrintSheet({ tags, siteUrl }: { tags: Tag[]; siteUrl: string }) 
           <li key={t.id} className={`${card} space-y-2`}>
             <label className="flex items-center gap-2 font-medium">
               <input type="checkbox" checked={selected.has(t.id)} onChange={() => toggle(t.id)} />
-              {t.itemName} <span className="text-sm font-normal text-gray-500">({TEMPLATES[t.design.template].label})</span>
+              {t.itemName} <span className="text-sm font-normal text-muted">({TEMPLATES[t.design.template].label})</span>
             </label>
             <div className="max-w-full overflow-x-auto">
               <TagPreview

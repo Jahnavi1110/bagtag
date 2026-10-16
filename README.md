@@ -31,6 +31,8 @@ Lost luggage, school bags, laptops and keys are often found by honest people who
 | Public finder page `/t/[code]` | "This item belongs to someone. Help return it!", a prominent banner when the item is reported **Lost**, message form with **opt-in location**, friendly 404 for unknown codes. |
 | Finder chat `/chat/[token]` | The finder's private link for reading the owner's replies and sending more messages. |
 | Scan counter | Each view of the public page increments the tag's scan count. |
+| Landing page | Playful one-viewport "creative studio" layout (pale lavender canvas, Epilogue 900 headlines, DM Sans body) with real navigation links and a "How it works" strip. |
+| Tagby mascot | Original plush luggage-tag mascot in pure SVG + CSS. Pupils follow the pointer, it bobs, blinks and looks around when idle, and its mood follows the tag status (Safe → happy, Lost → worried, Found → celebrating; celebrates for 2 s after a finder sends a message). Also shown on the empty dashboard and the unknown-code 404. Respects `prefers-reduced-motion`. |
 
 Templates and their print sizes:
 
@@ -48,7 +50,8 @@ Templates and their print sizes:
 |---|---|
 | Next.js 15 (App Router) + React 19 | Full-stack framework: pages, server actions, route handlers, middleware |
 | TypeScript | Static typing across client and server |
-| Tailwind CSS 4 | Utility-first styling (kept in small components for an easy redesign) |
+| Tailwind CSS 4 | Utility-first styling; design tokens live in `app/tokens.css` |
+| Fontsource (Epilogue 900, DM Sans 400) | Self-hosted fonts, no external font URLs |
 | SQLite via `better-sqlite3` | Local relational database (`./data/tagback.db`), foreign keys and indexes |
 | `bcryptjs` | Password hashing |
 | `jose` | Signing and verifying the session JWT (HS256) |
@@ -125,7 +128,9 @@ Pages: `/`, `/login`, `/signup`, `/dashboard`, `/tags/new`, `/tags/[id]`, `/tags
 ## Project Structure
 
 ```
-app/                     routes only (thin pages)
+app/                     routes only (thin pages); tokens.css = design tokens
+  page.tsx               landing page (no shared header)
+  (app)/                 route group with the shared header; URLs unchanged
   api/finder/messages/   first finder message (route handler)
   api/finder/reply/      follow-up finder message
   api/uploads/[name]/    serves tag photos
@@ -134,6 +139,9 @@ app/                     routes only (thin pages)
   t/[code]/              public finder page (+ not-found)
   tags/new/  tags/[id]/  tags/[id]/edit/  tags/print/
 components/              UI components (Tailwind)
+  landing/               Landing page
+  mascot/                Tagby.tsx (+ tagby.css animations)
+  brand/                 Wordmark (hand-drawn SVG; also public/logo.svg favicon)
   templates/             LuggageTag, RoundSticker, Keychain, SchoolLabel, LaptopSticker, Qr
   forms/                 AuthForm, TagForm, StatusForm, DeleteTagForm, OwnerReplyForm, FinderMessageForm, FinderReplyForm
   TagPreview, TagExportPanel, PrintSheet, MessageThread, StatusBadge, DashboardView, TagManageView, PublicTagView, FinderChatView
@@ -142,6 +150,7 @@ lib/
   auth/                  jwt.ts (edge-safe), session.ts, requireOwner.ts (access control)
   actions/               server actions (auth, tags)
   finder.ts              everything a finder can do (public fields only)
+  eyeTracking.ts         pupil maths for Tagby (vector → clamp → lerp)
   codes.ts tokens.ts rateLimit.ts validation.ts status.ts templates.ts exportTag.ts uploads.ts imageType.ts http.ts
 middleware.ts            protects /dashboard and /tags/*
 scripts/                 env bootstrap, seed, db-reset, screenshots
@@ -181,33 +190,37 @@ npm run dev    # http://localhost:3000
 ## Testing
 
 ```bash
-npm test          # 25 unit tests
+npm test          # 30 unit tests
 npm run test:e2e  # end-to-end smoke test (Chromium)
 ```
 
-- **Unit (Vitest):** code generation (length, alphabet, 10,000 unique codes), token hashing (raw token never stored, checked against the database file), zod schemas (message length, honeypot, note length, coordinates), rate limiter, status transitions, and owner access control on a temporary database.
+- **Unit (Vitest):** code generation (length, alphabet, 10,000 unique codes), token hashing (raw token never stored, checked against the database file), zod schemas (message length, honeypot, note length, coordinates), rate limiter, status transitions, owner access control on a temporary database, and Tagby's eye-tracking maths.
 - **End-to-end (Playwright):** the seeded user logs in and creates a tag, then downloads the PDF (checks the `%PDF` header). An anonymous browser context opens `/t/[code]` and sends a message. The owner sees it and replies, and the finder's private chat shows the reply. The test also asserts the owner's email never appears on finder pages.
 
 ## Screenshots
 
 | | |
 |---|---|
-| Landing | `docs/screenshots/landing.png` |
+| Landing (desktop, pointer top-left) | `docs/screenshots/landing-desktop.png` |
+| Landing (mobile) | `docs/screenshots/landing-mobile.png` |
 | Login | `docs/screenshots/login.png` |
 | Dashboard | `docs/screenshots/dashboard.png` |
 | Tag maker | `docs/screenshots/tag-maker.png` |
 | Exported PNG | `docs/screenshots/tag-export.png` |
 | Finder page | `docs/screenshots/finder-page.png` |
 | Finder page (Lost) | `docs/screenshots/finder-lost.png` |
+| Tagby worried (Lost) | `docs/screenshots/finder-lost-tagby.png` |
+| Tagby celebrating (Found) | `docs/screenshots/finder-found-tagby.png` |
 | Owner chat | `docs/screenshots/owner-chat.png` |
 | Finder page, mobile (390×844) | `docs/screenshots/finder-mobile.png` |
 | Print sheet | `docs/screenshots/print-sheet.png` |
 | GitHub repository | `docs/screenshots/github-repo.png` (after the first push: `npm run screenshot:github`) |
 
+![Landing page with Tagby](docs/screenshots/landing-desktop.png)
 ![Dashboard](docs/screenshots/dashboard.png)
 ![Tag maker](docs/screenshots/tag-maker.png)
 ![Owner chat](docs/screenshots/owner-chat.png)
-![Finder page (Lost)](docs/screenshots/finder-lost.png)
+![Tagby worried on a Lost item](docs/screenshots/finder-lost-tagby.png)
 
 ## Design Decisions
 
@@ -221,6 +234,9 @@ npm run test:e2e  # end-to-end smoke test (Chromium)
 - **Status transitions are explicit** (`safe → lost → found → safe`, plus cancel and re-report) and enforced on the server.
 - **In-memory rate limiting** is enough for a single local process. It sits behind a small interface so it can be swapped for Redis or Upstash.
 - **Thin pages.** Route files only load data and render one component. UI lives in small Tailwind components (shared class strings in `components/ui.ts`) for the planned redesign.
+- **Landing page in its own layout.** The app pages moved into an `(app)` route group that holds the shared header, so the landing page can use the full viewport; no URL changed.
+- **Tagby without animation libraries.** Pure SVG with CSS keyframes for bob/blink/wobble/confetti, an SVG filter (feTurbulence + feDisplacementMap) for the knitted edge plus a low-opacity grain overlay. The pupil maths (`lib/eyeTracking.ts`) is pure and unit-tested.
+- **Animation loop only while needed.** The requestAnimationFrame loop starts on pointer movement or an idle glance and stops as soon as the pupils reach their target.
 - **Middleware on the Node.js runtime.** This uses the same `jose` build and environment as the rest of the server and avoids Edge-runtime warnings.
 
 ## Challenges
@@ -232,6 +248,12 @@ npm run test:e2e  # end-to-end smoke test (Chromium)
 - **QR size vs. layout on small templates.** In the first screenshots the 38 mm QR on the luggage tag squeezed the text column and wrapped the code line. The QR was reduced to 34 mm (still well above the scannable minimum) and the code line set to no-wrap.
 - **`server-only` throws outside Next.js**, which broke Vitest and the `tsx` seed script. The database module is kept free of it (scripts import it directly), and Vitest aliases `server-only` to an empty stub.
 - **Keeping the finder anonymous without RLS** required designing the public data path (`PublicTag`) and the owner path (`ownerScope`) as separate modules, with tests that check each boundary.
+
+- **Tagby's eyes aimed at stale positions.** Eye centres were measured once on mount; the self-hosted fonts loaded afterwards and shifted the layout without a resize or scroll event, so the pupils looked the wrong way (seen in the first finder screenshot). The eyes are now re-measured whenever a new movement starts, as well as on resize/scroll.
+- **Keeping the eye maths correct when the SVG is scaled.** The pointer vector is in screen pixels but the pupils move in SVG units; dividing by the rendered px-per-unit keeps the direction and clamp correct at 150 px and at 55 vh alike (unit-tested).
+- **Screenshot pointer before hydration.** Moving the Playwright mouse before React hydrated meant no listener saw it; the script now waits for the network to go idle and glides the pointer in steps.
+- **OneDrive and `.next`.** A rebuild failed with `EINVAL: readlink …/.next/server/…` because OneDrive had converted build output into placeholders; deleting `.next` fixed it.
+- **Bold text disappeared on the printed tags.** Only DM Sans 400 is loaded and `font-synthesis: none` is set, so the templates' bold item names rendered regular in the exported PNG. Item names on tags now use Epilogue 900.
 
 ## Known Limitations
 
@@ -250,6 +272,11 @@ npm run test:e2e  # end-to-end smoke test (Chromium)
 - Password reset and email verification.
 - More templates, custom fonts and logo upload; NFC tag support.
 - Optional time-limited finder links and owner-side blocking of abusive finders.
+
+## Credits
+
+- Landing-page design language (canvas colour, type pairing, three-column composition) adapted from the motionsites.ai **"Playful Idea"** template. The template's video, logo and copy are not used.
+- Tagby, the wordmark and all illustrations are original SVG drawn for this project.
 
 ## License
 

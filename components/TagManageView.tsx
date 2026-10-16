@@ -19,10 +19,10 @@ export function TagManageView({ tag, conversations, siteUrl }: { tag: Tag; conve
             <h1 className="text-2xl font-bold">{tag.itemName}</h1>
             <StatusBadge status={tag.status} />
           </div>
-          <p className="text-sm text-gray-600">
-            Public page: <Link href={`/t/${tag.code}`} className="break-all text-blue-700 underline">{publicUrl}</Link> · {tag.scanCount} {tag.scanCount === 1 ? "scan" : "scans"}
+          <p className="text-sm text-muted">
+            Public page: <Link href={`/t/${tag.code}`} className="break-all text-ink underline">{publicUrl}</Link> · {tag.scanCount} {tag.scanCount === 1 ? "scan" : "scans"}
           </p>
-          {tag.note && <p className="text-sm text-gray-700">Note: {tag.note}</p>}
+          {tag.note && <p className="text-sm text-muted">Note: {tag.note}</p>}
           <StatusForm tagId={tag.id} status={tag.status} />
         </div>
         <div className={card}>
@@ -37,11 +37,11 @@ export function TagManageView({ tag, conversations, siteUrl }: { tag: Tag; conve
 
       <section className={`${card} space-y-4`}>
         <h2 className="font-semibold">Messages from finders</h2>
-        {conversations.length === 0 && <p className="text-sm text-gray-500">No messages yet. When someone scans your tag and writes to you, it shows up here.</p>}
+        {conversations.length === 0 && <p className="text-sm text-muted">No messages yet. When someone scans your tag and writes to you, it shows up here.</p>}
         {conversations.map((c, i) => (
-          <div key={c.id} className="rounded-md border border-gray-200 p-3" data-testid="conversation">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Finder #{conversations.length - i} {c.unread > 0 && <span className="text-blue-700">· {c.unread} new</span>}
+          <div key={c.id} className="rounded-xl border border-ink/10 p-3" data-testid="conversation">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
+              Finder #{conversations.length - i} {c.unread > 0 && <span className="text-ink">· {c.unread} new</span>}
             </div>
             <MessageThread messages={c.messages} viewer="owner" />
             <OwnerReplyForm conversationId={c.id} />
