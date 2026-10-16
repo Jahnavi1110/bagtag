@@ -157,7 +157,7 @@ scripts/                 env bootstrap, seed, db-reset, screenshots
 tests/unit/              Vitest
 tests/e2e/               Playwright smoke test
 docs/screenshots/        generated screenshots
-report/                  AAT-1 report generator (build-report.cjs) and .docx
+report/                  AAT-1 report generator (build-report.cjs, cover.cjs = college cover sheet) and .docx
 ```
 
 ## Setup

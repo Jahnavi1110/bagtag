@@ -15,6 +15,7 @@ const {
   AlignmentType, BorderStyle, Document, Footer, ImageRun, LevelFormat, Packer, PageNumber,
   Paragraph, ShadingType, Table, TableCell, TableRow, TextRun, WidthType,
 } = require("docx");
+const { coverPage } = require("./cover.cjs");
 
 const ROOT = path.join(__dirname, "..");
 const SHOTS = path.join(ROOT, "docs", "screenshots");
@@ -22,11 +23,9 @@ const OUT = path.join(__dirname, "AAT1_Report.docx");
 
 // ---------- Cover details ----------
 const COVER = {
-  studentName: "____________________",
-  usn: "____________________",
-  semesterSection: "____________________",
-  subject: "____________________",
-  academicYear: "2026–27",
+  // Left empty on the cover sheet for the student to fill in by hand.
+  studentName: "",
+  usn: "",
   projectTitle: "Tagback: Privacy-Preserving QR Bag Tags for Lost-Item Recovery",
   github: "https://github.com/Jahnavi1110/bagtag",
 };
@@ -44,7 +43,6 @@ const p = (children, opts = {}) =>
   new Paragraph({ spacing: { after: 160, line: 276 }, ...opts, children: typeof children === "string" ? [run(children)] : children });
 const bold = (t, opts = {}) => run(t, { bold: true, ...opts });
 
-const title = (t, size, after = 200) => new Paragraph({ spacing: { before: 0, after }, children: [bold(t, { size })] });
 const h1 = (t) => new Paragraph({ spacing: { before: 360, after: 200 }, keepNext: true, children: [bold(t, { size: 30 })] });
 const h2 = (t) => new Paragraph({ spacing: { before: 240, after: 160 }, keepNext: true, children: [bold(t, { size: 24 })] });
 const label = (l, value, opts = {}) =>
@@ -262,20 +260,15 @@ const SNIPPETS = [
 ];
 
 // ---------- Document ----------
-const children = [
-  // Cover block
-  title("ALTERNATIVE ASSESSMENT TEST – 1", 40, 280),
-  title("PORTFOLIO-DRIVEN DEVELOPMENT", 30, 240),
-  title("PROJECT REPORT", 24, 240),
-  label("Student Name", COVER.studentName),
-  label("USN", COVER.usn),
-  label("Semester / Section", COVER.semesterSection, { italics: true }),
-  label("Subject", COVER.subject),
-  label("Academic Year", COVER.academicYear, { after: 240 }),
-  label("Project Title", COVER.projectTitle, { after: 240 }),
-  label("GitHub Repository Link", COVER.github),
-  rule(),
+// Page 1: the college's AAT-1 cover sheet (report/cover.cjs).
+const coverChildren = coverPage({
+  topic: COVER.projectTitle,
+  logoPath: path.join(__dirname, "assets", "college-logo.jpeg"),
+  usn: COVER.usn,
+  studentName: COVER.studentName,
+});
 
+const children = [
   // 1
   h1("1. PROJECT TITLE"),
   label("Project Name", COVER.projectTitle, { after: 120 }),
@@ -441,10 +434,16 @@ const doc = new Document({
   },
   sections: [
     {
+      // Cover sheet: the template's own 1-inch margins and no page number.
+      properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1440, bottom: 1440, left: 1440, right: 1440 } } },
+      children: coverChildren,
+    },
+    {
       properties: {
         page: {
           size: { width: 12240, height: 15840 }, // US Letter, as in the template
           margin: { top: 1440, bottom: 1440, left: 1560, right: 1560, footer: 708 },
+          pageNumbers: { start: 1 },
         },
       },
       footers: {
