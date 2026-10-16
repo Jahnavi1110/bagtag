@@ -20,7 +20,7 @@ export function TagManageView({ tag, conversations, siteUrl }: { tag: Tag; conve
             <StatusBadge status={tag.status} />
           </div>
           <p className="text-sm text-gray-600">
-            Public page: <Link href={`/t/${tag.code}`} className="break-all text-blue-700 underline">{publicUrl}</Link> · {tag.scanCount} scans
+            Public page: <Link href={`/t/${tag.code}`} className="break-all text-blue-700 underline">{publicUrl}</Link> · {tag.scanCount} {tag.scanCount === 1 ? "scan" : "scans"}
           </p>
           {tag.note && <p className="text-sm text-gray-700">Note: {tag.note}</p>}
           <StatusForm tagId={tag.id} status={tag.status} />

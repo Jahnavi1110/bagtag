@@ -12,10 +12,10 @@ export function LuggageTag({ itemName, design, code, qr }: TemplateProps) {
           <div className="mt-1 text-[24px] font-bold leading-tight">{itemName || "Item name"}</div>
           <div className="mt-2 text-[14px] leading-snug opacity-90">{design.customText}</div>
         </div>
-        <div className="font-mono text-[13px] tracking-widest opacity-80">tagback · {code}</div>
+        <div className="whitespace-nowrap font-mono text-[12px] tracking-wider opacity-80">tagback · {code}</div>
       </div>
       <div className="flex items-center pr-[20px]">
-        <Qr src={qr} sizeMm={38} />
+        <Qr src={qr} sizeMm={34} />
       </div>
     </div>
   );

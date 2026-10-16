@@ -4,6 +4,8 @@ import type { TagSummary } from "@/lib/types";
 import { StatusBadge } from "./StatusBadge";
 import { btnPrimary, btnSecondary, card } from "./ui";
 
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
 export function DashboardView({ tags }: { tags: TagSummary[] }) {
   return (
     <div className="space-y-4">
@@ -30,8 +32,8 @@ export function DashboardView({ tags }: { tags: TagSummary[] }) {
                   {TEMPLATES[t.design.template].label} · <span className="font-mono">{t.code}</span>
                 </div>
                 <div className="mt-1 flex gap-3 text-sm text-gray-600">
-                  <span>{t.scanCount} scans</span>
-                  <span>{t.conversationCount} conversations</span>
+                  <span>{plural(t.scanCount, "scan")}</span>
+                  <span>{plural(t.conversationCount, "conversation")}</span>
                   {t.unreadCount > 0 && <span className="font-semibold text-blue-700">{t.unreadCount} unread</span>}
                 </div>
               </div>

@@ -11,3 +11,4 @@ playwright-report/
 next-env.d.ts
 report/*.pdf
 report/~$*
+/AAT-1 Portfolio-Driven Development Report.pdf
