@@ -1,0 +1,57 @@
+{
+  "name": "tagback",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "predev": "tsx scripts/ensure-env.ts",
+    "dev": "next dev",
+    "prebuild": "tsx scripts/ensure-env.ts",
+    "build": "next build",
+    "prestart": "tsx scripts/ensure-env.ts",
+    "start": "next start",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "db:reset": "tsx scripts/db-reset.ts",
+    "preseed": "tsx scripts/ensure-env.ts",
+    "seed": "tsx scripts/seed.ts",
+    "screenshots": "tsx scripts/screenshots.ts"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
+    "html-to-image": "^1.11.13",
+    "jose": "^6.2.12",
+    "jspdf": "^4.2.1",
+    "nanoid": "^6.0.2",
+    "next": "^15.5.28",
+    "qrcode": "^1.5.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^26.6.5",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "docx": "^9.11.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.28",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
+  },
+  "allowScripts": {
+    "better-sqlite3@13.0.3": true,
+    "esbuild@0.28.2": true,
+    "unrs-resolver@1.12.2": true
+  }
+}
