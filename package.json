@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "npm run build && playwright test",
     "db:reset": "tsx scripts/db-reset.ts",
     "preseed": "tsx scripts/ensure-env.ts",
     "seed": "tsx scripts/seed.ts",
