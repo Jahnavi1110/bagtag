@@ -3,8 +3,8 @@ node_modules/
 out/
 .env*
 !.env.example
-data/
-uploads/
+/data/
+/uploads/
 test-results/
 playwright-report/
 *.tsbuildinfo
