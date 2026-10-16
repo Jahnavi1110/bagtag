@@ -415,7 +415,7 @@ const children = [
   // Declaration
   h1("STUDENT DECLARATION"),
   p("I hereby declare that the project submitted as part of AAT-1 is my work and that I understand the implementation and contents of the project.", { keepNext: true }),
-  label("Student Name", "____________________", { after: 280, keepNext: true }),
+  label("Student Name", "__Jahnavi Modi__", { after: 280, keepNext: true }),
   label("Signature", "____________________", { after: 280, keepNext: true }),
   label("Date", "____________________"),
 ];
