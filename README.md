@@ -175,6 +175,8 @@ npm run dev    # http://localhost:3000
 | `seed` | Idempotent demo data |
 | `db:reset` | Recreate the SQLite database |
 | `screenshots` | Build, start on a free port, seed, capture `docs/screenshots/*`, stop |
+| `screenshot:github` | Capture the public GitHub repo page to `docs/screenshots/github-repo.png` |
+| `report` | Rebuild `report/AAT1_Report.docx` from the code, screenshots and git history |
 
 ## Testing
 
@@ -200,6 +202,7 @@ npm run test:e2e  # end-to-end smoke test (Chromium)
 | Owner chat | `docs/screenshots/owner-chat.png` |
 | Finder page, mobile (390×844) | `docs/screenshots/finder-mobile.png` |
 | Print sheet | `docs/screenshots/print-sheet.png` |
+| GitHub repository | `docs/screenshots/github-repo.png` (after the first push: `npm run screenshot:github`) |
 
 ![Dashboard](docs/screenshots/dashboard.png)
 ![Tag maker](docs/screenshots/tag-maker.png)

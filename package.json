@@ -16,7 +16,9 @@
     "db:reset": "tsx scripts/db-reset.ts",
     "preseed": "tsx scripts/ensure-env.ts",
     "seed": "tsx scripts/seed.ts",
-    "screenshots": "tsx scripts/screenshots.ts"
+    "screenshots": "tsx scripts/screenshots.ts",
+    "screenshot:github": "tsx scripts/github-screenshot.ts",
+    "report": "node report/build-report.cjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
