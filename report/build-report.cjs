@@ -354,7 +354,7 @@ const children = [
   rule(),
   new Paragraph({ spacing: { before: 120, after: 80 }, keepNext: true, children: [bold("Repository Screenshot:")] }),
   fs.existsSync(path.join(SHOTS, "github-repo.png"))
-    ? image("github-repo.png")
+    ? image("github-repo.png", { maxW: 500 })
     : p([run("[Insert screenshot]", { italics: true })]),
   p(
     "The repository follows the standard Next.js App Router layout. The app/ folder contains only thin route files: owner pages (/dashboard and /tags/*), public pages (/t/[code] and /chat/[token]) and the finder API route handlers under app/api/. User-interface code lives in components/, with the five tag designs in components/templates/ and all forms in components/forms/. Business logic is in lib/: the database connection and schema (lib/db), authentication and the owner access-control helper (lib/auth), server actions (lib/actions), the finder service (lib/finder.ts) and small single-purpose modules for codes, tokens, rate limiting, validation and export. scripts/ holds the seed, database-reset, environment bootstrap and screenshot scripts; tests/ holds the Vitest unit tests and the Playwright smoke test; docs/screenshots/ holds the generated screenshots; and report/ holds the generator for this report.",
@@ -395,9 +395,9 @@ const children = [
 
   // Declaration
   h1("STUDENT DECLARATION"),
-  p("I hereby declare that the project submitted as part of AAT-1 is my work and that I understand the implementation and contents of the project."),
-  label("Student Name", "____________________", { after: 280 }),
-  label("Signature", "____________________", { after: 280 }),
+  p("I hereby declare that the project submitted as part of AAT-1 is my work and that I understand the implementation and contents of the project.", { keepNext: true }),
+  label("Student Name", "____________________", { after: 280, keepNext: true }),
+  label("Signature", "____________________", { after: 280, keepNext: true }),
   label("Date", "____________________"),
 ];
 
